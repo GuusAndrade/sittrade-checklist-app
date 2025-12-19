@@ -101,21 +101,44 @@ class ChecklistItemTile extends StatelessWidget {
 class _ChecklistList extends StatelessWidget {
   final Checklist checklist;
 
-  const _ChecklistList({required this.checklist});
+  const _ChecklistList({
+    required this.checklist,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final completedCount =
+        checklist.items.where((item) => item.checked).length;
+
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text(
-            checklist.title,
-            style: Theme.of(context).textTheme.titleLarge,
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    checklist.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$completedCount / ${checklist.items.length} itens concluídos',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         Expanded(
           child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: checklist.items.length,
             itemBuilder: (context, index) {
               final item = checklist.items[index];
@@ -124,16 +147,22 @@ class _ChecklistList extends StatelessWidget {
             },
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: ElevatedButton(
-            onPressed: () {
-              context.read<ChecklistBloc>().add(const SubmitChecklist());
-            },
-            child: const Text('Enviar Checklist'),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FilledButton.icon(
+              icon: const Icon(Icons.send),
+              label: const Text('Enviar Checklist'),
+              onPressed: () {
+                context
+                    .read<ChecklistBloc>()
+                    .add(const SubmitChecklist());
+              },
+            ),
           ),
-        ),
+        )
       ],
     );
   }
 }
+
