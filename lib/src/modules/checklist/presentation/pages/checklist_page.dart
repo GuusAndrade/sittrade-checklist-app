@@ -72,6 +72,7 @@ class ChecklistItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Checkbox(
           value: item.checked,
@@ -79,21 +80,23 @@ class ChecklistItemTile extends StatelessWidget {
             context.read<ChecklistBloc>().add(ToggleChecklistItem(item.id));
           },
         ),
-        title: Text(item.description),
-        subtitle: item.photoPath != null ? const Text('Photo attached') : null,
+        title: Text(
+          item.description,
+          style: TextStyle(
+            decoration: item.checked ? TextDecoration.lineThrough : null,
+          ),
+        ),
+        subtitle: item.photoPath != null ? const Text('📸 Photo added') : null,
         trailing: IconButton(
+          tooltip: 'Add photo',
           icon: const Icon(Icons.camera_alt),
           onPressed: () {
-            _onAddPhoto(context);
+            context.read<ChecklistBloc>().add(
+              AddPhotoToItem(itemId: item.id, photoPath: 'fake/path/photo.jpg'),
+            );
           },
         ),
       ),
-    );
-  }
-
-  void _onAddPhoto(BuildContext context) {
-    context.read<ChecklistBloc>().add(
-      AddPhotoToItem(itemId: item.id, photoPath: 'fake/path/photo.jpg'),
     );
   }
 }
@@ -101,14 +104,11 @@ class ChecklistItemTile extends StatelessWidget {
 class _ChecklistList extends StatelessWidget {
   final Checklist checklist;
 
-  const _ChecklistList({
-    required this.checklist,
-  });
+  const _ChecklistList({required this.checklist});
 
   @override
   Widget build(BuildContext context) {
-    final completedCount =
-        checklist.items.where((item) => item.checked).length;
+    final completedCount = checklist.items.where((item) => item.checked).length;
 
     return Column(
       children: [
@@ -128,7 +128,7 @@ class _ChecklistList extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '$completedCount / ${checklist.items.length} itens concluídos',
+                    '$completedCount / ${checklist.items.length} items completed',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -152,17 +152,14 @@ class _ChecklistList extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: FilledButton.icon(
               icon: const Icon(Icons.send),
-              label: const Text('Enviar Checklist'),
+              label: const Text('Send Checklist'),
               onPressed: () {
-                context
-                    .read<ChecklistBloc>()
-                    .add(const SubmitChecklist());
+                context.read<ChecklistBloc>().add(const SubmitChecklist());
               },
             ),
           ),
-        )
+        ),
       ],
     );
   }
 }
-
