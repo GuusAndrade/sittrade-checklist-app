@@ -7,6 +7,10 @@ abstract class ChecklistEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class LoadChecklist extends ChecklistEvent {
+  const LoadChecklist();
+}
+
 class ToggleChecklistItem extends ChecklistEvent {
   final String itemId;
 
