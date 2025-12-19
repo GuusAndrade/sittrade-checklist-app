@@ -14,7 +14,8 @@ class MyApp extends StatelessWidget {
       title: 'SitTrade Checklist',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
       ),
       home: BlocProvider(
         create: (_) => ChecklistBloc()..add(const LoadChecklist()),
