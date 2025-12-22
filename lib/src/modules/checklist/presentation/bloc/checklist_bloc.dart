@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sittrade_checklist_app/src/modules/checklist/domain/usecases/submit_checklist_usecase.dart';
 
 import 'checklist_event.dart';
 import 'checklist_state.dart';
@@ -6,7 +7,12 @@ import '../../domain/entities/checklist.dart';
 import '../../domain/entities/checklist_item.dart';
 
 class ChecklistBloc extends Bloc<ChecklistEvent, ChecklistState> {
-  ChecklistBloc() : super(const ChecklistInitial()) {
+  final SubmitChecklistUseCase submitChecklistUseCase;
+
+  ChecklistBloc({SubmitChecklistUseCase? submitChecklistUseCase})
+    : submitChecklistUseCase =
+          submitChecklistUseCase ?? SubmitChecklistUseCase(),
+      super(const ChecklistInitial()) {
     on<LoadChecklist>(_onLoadChecklist);
     on<ToggleChecklistItem>(_onToggleItem);
     on<AddPhotoToItem>(_onAddPhoto);
@@ -34,17 +40,14 @@ class ChecklistBloc extends Bloc<ChecklistEvent, ChecklistState> {
           id: '2',
           description: 'Organizar gôndola',
           checked: false,
-        )
-      ]
+        ),
+      ],
     );
 
     emit(ChecklistLoaded(checklist));
   }
 
-  void _onToggleItem(
-    ToggleChecklistItem event,
-    Emitter<ChecklistState> emit,
-  ) {
+  void _onToggleItem(ToggleChecklistItem event, Emitter<ChecklistState> emit) {
     final currentState = state;
 
     if (currentState is! ChecklistLoaded) return;
@@ -62,15 +65,12 @@ class ChecklistBloc extends Bloc<ChecklistEvent, ChecklistState> {
           id: currentState.checklist.id,
           title: currentState.checklist.title,
           items: updatedItems,
-        )
-      )
+        ),
+      ),
     );
   }
 
-  void _onAddPhoto(
-    AddPhotoToItem event,
-    Emitter<ChecklistState> emit,
-  ) {
+  void _onAddPhoto(AddPhotoToItem event, Emitter<ChecklistState> emit) {
     final currentState = state;
 
     if (currentState is! ChecklistLoaded) return;
@@ -88,8 +88,8 @@ class ChecklistBloc extends Bloc<ChecklistEvent, ChecklistState> {
           id: currentState.checklist.id,
           title: currentState.checklist.title,
           items: updatedItems,
-        )
-      )
+        ),
+      ),
     );
   }
 
@@ -97,10 +97,19 @@ class ChecklistBloc extends Bloc<ChecklistEvent, ChecklistState> {
     SubmitChecklist event,
     Emitter<ChecklistState> emit,
   ) async {
+    final currentState = state;
+
+    if (currentState is! ChecklistLoaded) return;
+
     emit(const ChecklistLoading());
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await submitChecklistUseCase(currentState.checklist);
 
-    emit(const ChecklistInitial());
+      emit(const ChecklistSubmitted());
+    } catch (e) {
+      emit(ChecklistError(e.toString()));
+      return;
+    }
   }
 }
